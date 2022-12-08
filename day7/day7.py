@@ -26,7 +26,7 @@ class Directory():
         new_dir = Directory(self, directory)
         self.children[directory] = new_dir
 
-    def size(self, size=0, cur_dir=None, max_size=0):
+    def size(self, cur_dir, max_size, size=0):
         if cur_dir is None:
             cur_dir = self
 
@@ -38,21 +38,8 @@ class Directory():
             return size
 
         for dir_ in cur_dir.children:
-            size = cur_dir.size(size, cur_dir.children[dir_], max_size)
+            size = cur_dir.size(cur_dir.children[dir_], max_size, size)
         return size
-
-    def walk(self, depth=0, cur_dir=None):
-        if cur_dir is None:
-            cur_dir = self
-            print(cur_dir.name)
-            depth += 1
-            cur_dir = self
-
-        for dir_ in cur_dir.children:
-            print(f"{' ' * (3 * depth)} {cur_dir.children[dir_].name}")
-            for f in cur_dir.files:
-                print(" " * (3 * (depth + 1)) + str(cur_dir.files[f]))
-            self.walk(depth+1, cur_dir.children[dir_])
 
 
 def create_directory_tree(inp):
@@ -79,9 +66,59 @@ def create_directory_tree(inp):
                     cur_dir.add_file(line_spl[1], line_spl[0])
                 idx += 1
     return tree
+
+
+def test_tree():
+    tree = Directory(None, "/")
+    tree.add_file("a", 1000)
+    tree.add_file("b", 1000)
+    tree.add_file("c", 1000)
+    tree.add_dir("a")
+    tree.children["a"].add_dir("a")
+    tree.children["a"].children["a"].add_file("a", 1000)
+    tree.children["a"].children["a"].add_file("b", 1000)
+    tree.children["a"].children["a"].add_file("c", 1000)
+    tree.children["a"].add_dir("b")
+    tree.children["a"].children["b"].add_file("a", 1000)
+    tree.children["a"].children["b"].add_file("b", 1000)
+    tree.children["a"].children["b"].add_file("c", 1000)
+    tree.children["a"].add_dir("c")
+    tree.children["a"].children["c"].add_file("a", 1000)
+    tree.children["a"].children["c"].add_file("b", 1000)
+    tree.children["a"].children["c"].add_file("c", 1000)
+
+    tree.add_dir("b")
+    tree.children["b"].add_dir("a")
+    tree.children["b"].children["a"].add_file("a", 1000)
+    tree.children["b"].children["a"].add_file("b", 1000)
+    tree.children["b"].children["a"].add_file("c", 1000)
+    tree.children["b"].add_dir("b")
+    tree.children["b"].children["b"].add_file("a", 1000)
+    tree.children["b"].children["b"].add_file("b", 1000)
+    tree.children["b"].children["b"].add_file("c", 1000)
+    tree.children["b"].add_dir("c")
+    tree.children["b"].children["c"].add_file("a", 1000)
+    tree.children["b"].children["c"].add_file("b", 1000)
+    tree.children["b"].children["c"].add_file("c", 1000)
+
+    tree.add_dir("c")
+    tree.children["c"].add_dir("a")
+    tree.children["c"].children["a"].add_file("a", 1000)
+    tree.children["c"].children["a"].add_file("b", 1000)
+    tree.children["c"].children["a"].add_file("c", 1000)
+    tree.children["c"].add_dir("b")
+    tree.children["c"].children["b"].add_file("a", 1000)
+    tree.children["c"].children["b"].add_file("b", 1000)
+    tree.children["c"].children["b"].add_file("c", 1000)
+    tree.children["c"].add_dir("c")
+    tree.children["c"].children["c"].add_file("a", 1000)
+    tree.children["c"].children["c"].add_file("b", 1000)
+    tree.children["c"].children["c"].add_file("c", 1000)
+    return tree
         
 
 if __name__ == "__main__":
     inp = get_input("input.txt")
     tree = create_directory_tree(inp)
-    print(tree.size(max_size=100000))
+    # tree = test_tree()
+    print(tree.size(tree, 100000))
