@@ -30,13 +30,13 @@ class Directory():
         if cur_dir is None:
             cur_dir = self
 
+        size += sum(cur_dir.files[i].size for i in cur_dir.files)
+
         if not cur_dir.children:
-            size += sum(cur_dir.files[i].size for i in cur_dir.files)
             return size
 
         for dir_ in cur_dir.children:
-            size += sum(cur_dir.files[i].size for i in cur_dir.files)
-            size = cur_dir.size(size, cur_dir.children[dir_])
+            return cur_dir.size(size, cur_dir.children[dir_])
         return size
 
     def walk(self, depth=0, cur_dir=None):
