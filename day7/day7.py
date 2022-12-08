@@ -26,17 +26,19 @@ class Directory():
         new_dir = Directory(self, directory)
         self.children[directory] = new_dir
 
-    def size(self, size=0, cur_dir=None):
+    def size(self, size=0, cur_dir=None, max_size=0):
         if cur_dir is None:
             cur_dir = self
 
-        size += sum(cur_dir.files[i].size for i in cur_dir.files)
+        dir_size = sum(cur_dir.files[i].size for i in cur_dir.files)
+        if dir_size <= max_size:
+            size += dir_size
 
         if not cur_dir.children:
             return size
 
         for dir_ in cur_dir.children:
-            return cur_dir.size(size, cur_dir.children[dir_])
+            size = cur_dir.size(size, cur_dir.children[dir_], max_size)
         return size
 
     def walk(self, depth=0, cur_dir=None):
@@ -82,5 +84,4 @@ def create_directory_tree(inp):
 if __name__ == "__main__":
     inp = get_input("input.txt")
     tree = create_directory_tree(inp)
-    tree.walk()
-    print(tree.size())
+    print(tree.size(max_size=100000))
