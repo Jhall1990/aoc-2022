@@ -36,9 +36,8 @@ class Directory():
             size = cur_dir.size(cur_dir.children[dir_], size)
         return size
 
-    def bf_search(self, max_size):
-        total = 0
-        def search(total, dirs, max_size):
+    def bf_search(self, max_size, min_size):
+        def search(dirs, max_size, total=0, closest_min=-1):
             new_dirs = []
             for dir_ in dirs:
                 new_dirs += [dir_.children[i] for i in dir_.children]
@@ -47,12 +46,16 @@ class Directory():
                 if size <= max_size:
                     total += size
 
+                if closest_min == -1 and size > min_size:
+                    closest_min = size
+                elif size > min_size and size < closest_min:
+                    closest_min = size
+
             if not new_dirs:
-                return total
-            total = search(total, new_dirs, max_size)
-            return total
-        search(total, [self.children[i] for i in self.children], max_size)
-        return total
+                return total, closest_min
+            total, closest_min = search(new_dirs, max_size, total, closest_min)
+            return total, closest_min
+        return search([self.children[i] for i in self.children], max_size, min_size)
 
 
 def create_directory_tree(inp):
@@ -79,59 +82,17 @@ def create_directory_tree(inp):
                     cur_dir.add_file(line_spl[1], line_spl[0])
                 idx += 1
     return tree
-
-
-def test_tree():
-    tree = Directory(None, "/")
-    tree.add_file("a", 1000)
-    tree.add_file("b", 1000)
-    tree.add_file("c", 1000)
-    tree.add_dir("a")
-    tree.children["a"].add_dir("a")
-    tree.children["a"].children["a"].add_file("a", 1000)
-    tree.children["a"].children["a"].add_file("b", 1000)
-    tree.children["a"].children["a"].add_file("c", 1000)
-    tree.children["a"].add_dir("b")
-    tree.children["a"].children["b"].add_file("a", 1000)
-    tree.children["a"].children["b"].add_file("b", 1000)
-    tree.children["a"].children["b"].add_file("c", 1000)
-    tree.children["a"].add_dir("c")
-    tree.children["a"].children["c"].add_file("a", 1000)
-    tree.children["a"].children["c"].add_file("b", 1000)
-    tree.children["a"].children["c"].add_file("c", 1000)
-
-    tree.add_dir("b")
-    tree.children["b"].add_dir("a")
-    tree.children["b"].children["a"].add_file("a", 1000)
-    tree.children["b"].children["a"].add_file("b", 1000)
-    tree.children["b"].children["a"].add_file("c", 1000)
-    tree.children["b"].add_dir("b")
-    tree.children["b"].children["b"].add_file("a", 1000)
-    tree.children["b"].children["b"].add_file("b", 1000)
-    tree.children["b"].children["b"].add_file("c", 1000)
-    tree.children["b"].add_dir("c")
-    tree.children["b"].children["c"].add_file("a", 1000)
-    tree.children["b"].children["c"].add_file("b", 1000)
-    tree.children["b"].children["c"].add_file("c", 1000)
-
-    tree.add_dir("c")
-    tree.children["c"].add_dir("a")
-    tree.children["c"].children["a"].add_file("a", 1000)
-    tree.children["c"].children["a"].add_file("b", 1000)
-    tree.children["c"].children["a"].add_file("c", 1000)
-    tree.children["c"].add_dir("b")
-    tree.children["c"].children["b"].add_file("a", 1000)
-    tree.children["c"].children["b"].add_file("b", 1000)
-    tree.children["c"].children["b"].add_file("c", 1000)
-    tree.children["c"].add_dir("c")
-    tree.children["c"].children["c"].add_file("a", 1000)
-    tree.children["c"].children["c"].add_file("b", 1000)
-    tree.children["c"].children["c"].add_file("c", 1000)
-    return tree
         
 
 if __name__ == "__main__":
     inp = get_input("input.txt")
     tree = create_directory_tree(inp)
-    # tree = test_tree()
-    print(tree.bf_search(100000))
+    size, _ = tree.bf_search(100000, -1)
+    print(size)
+
+    DISK_TOTAL = 70000000
+    MIN_NEEDED = 30000000
+    total = tree.size(tree)
+    to_free = MIN_NEEDED - (DISK_TOTAL - total)
+    _, closest_min = tree.bf_search(1000000, to_free)
+    print(closest_min)
